@@ -66,7 +66,7 @@ void sendCommand(uint8_t cmd) {
 
 /* Sends a data byte to the LCD  */
 void sendData(uint8_t data) {
-  HAL_GPIO_WritePin(__lcd->RS->GPIOx, __lcd->RS->GPIO_Pin_x, GPIO_PIN_SET); // Command mode
+  HAL_GPIO_WritePin(__lcd->RS->GPIOx, __lcd->RS->GPIO_Pin_x, GPIO_PIN_SET); // Data mode
   HAL_GPIO_WritePin(__lcd->RW->GPIOx, __lcd->RW->GPIO_Pin_x, GPIO_PIN_RESET); // Write mode
   
   write4Bits(data >> 4);
@@ -160,14 +160,14 @@ void LCD_clearScreen(LCD_TypeDef* lcd) {
   assert_param(lcd != NULL);
   __lcd = lcd; // NOTE: This line must exist for all user APIs.
   sendCommand(LCD_CLEARDISPLAY);
-  HAL_Delay(2);
+  HAL_Delay(1);
 }
 
 void LCD_home(LCD_TypeDef* lcd) {
   assert_param(lcd != NULL);
   __lcd = lcd; // NOTE: This line must exist for all user APIs.
   sendCommand(LCD_RETURNHOME);
-  HAL_Delay(2);
+  HAL_Delay(1);
   lcd->currCol = lcd->currLine = 0;
 }
 
@@ -175,18 +175,15 @@ HAL_StatusTypeDef LCD_setCursor(LCD_TypeDef* lcd, uint8_t line, uint8_t col) {
   assert_param(lcd != NULL);
   __lcd = lcd; // NOTE: This line must exist for all user APIs.
   
-  // XXX... Go to next line in 2-line mode.
-  if(col > 0x4f) {
-    col = 0;
-    line = 0;
-  }
-  else if((col > 0x0f) && (line == 0)) {
-    col = 0x40;
-    line = 1;
-  }
+  // Making sure lines and columns are taken care of.
+  uint8_t temp_col;
+  col = col % 16;
+  temp_col = col;
+  if(line == 1)
+    temp_col += 0x40;
   
-  sendCommand(LCD_SETDDRAMADDR | col);
-  HAL_Delay(2);
+  sendCommand(LCD_SETDDRAMADDR | temp_col);
+  HAL_Delay(1);
   lcd->currLine = line;
   lcd->currCol = col;
   
@@ -197,9 +194,23 @@ void LCD_putchar(LCD_TypeDef* lcd, uint8_t c) {
   assert_param(lcd != NULL);
   __lcd = lcd; // NOTE: This line must exist for all user APIs.
   sendData(c);
-  HAL_Delay(2);
+  HAL_Delay(1);
   
-  // Update cursor values. NOTE: For 1-line mode only.
-  if(LCD_setCursor(lcd, lcd->currLine, lcd->currCol + 1) == HAL_ERROR)
-    assert_failed(__FILE__, __LINE__);
+  // Move cursor forward 1-step.
+  if((lcd->currLine == 0) && (lcd->currCol == 15))
+    LCD_setCursor(lcd, 1, 0);
+  else if((lcd->currLine == 1) && (lcd->currCol == 15))
+    LCD_setCursor(lcd, 0, 0);
+  else
+    LCD_setCursor(lcd, lcd->currLine, lcd->currCol + 1);
+}
+
+void LCD_putstr(LCD_TypeDef* lcd, uint8_t* s) {
+  assert_param(lcd != NULL);
+  assert_param(s != NULL);
+  __lcd = lcd; // NOTE: This line must exist for all user APIs.
+  
+  for(; *s != 0; ++s) {
+    LCD_putchar(lcd, *s);
+  }
 }

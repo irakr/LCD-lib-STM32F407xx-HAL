@@ -87,21 +87,10 @@ int main(void)
   
   while (1)
   {
-    /*
+    LCD_putstr(lcd, (uint8_t*)"Hello World!");
+    LCD_clearScreen(lcd);
     LCD_setCursor(lcd, 0, 0);
-    HAL_Delay(1000);
-    LCD_setCursor(lcd, 0, 1);
-    HAL_Delay(1000);
-    LCD_setCursor(lcd, 0, 2);
-    HAL_Delay(1000);
-    LCD_setCursor(lcd, 0, 3);
-    HAL_Delay(1000);
-    LCD_setCursor(lcd, 0, 4);
-    HAL_Delay(1000);
-    LCD_setCursor(lcd, 0, 5);
-    HAL_Delay(1000);
-    */
-    
+    /*
     LCD_putchar(lcd, 'A');
     HAL_Delay(200);
     LCD_putchar(lcd, 'B');
@@ -110,6 +99,8 @@ int main(void)
     HAL_Delay(200);
     LCD_putchar(lcd, 'D');
     HAL_Delay(200);
+    */
+    
   }
 }
 

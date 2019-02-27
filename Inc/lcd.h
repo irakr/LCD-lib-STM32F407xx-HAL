@@ -88,6 +88,9 @@ HAL_StatusTypeDef LCD_setCursor(LCD_TypeDef* lcd, uint8_t line, uint8_t col);
 /*  Put a character on the cursor.  */
 void LCD_putchar(LCD_TypeDef* lcd, uint8_t c);
 
+/*  Put a string of chars starting from the current cursor position.  */
+void LCD_putstr(LCD_TypeDef* lcd, uint8_t* s);
+
 /* Sends a command byte to the LCD  */
 void sendCommand(uint8_t cmd);
 
